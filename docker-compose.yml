@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: habit_tracker_app
+    restart: always
+    working_dir: /var/www/html
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=habit_tracker
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=Mn1@34567
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "9000:9000"
+    networks:
+      - habit_tracker_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: php-fpm
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: habit_tracker_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Mn1@34567
+      POSTGRES_DB: habit_tracker
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - habit_tracker_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:alpine
+    container_name: habit_tracker_nginx
+    restart: always
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - habit_tracker_network
+    depends_on:
+      - app
+
+volumes:
+  postgres_data:
+
+networks:
+  habit_tracker_network:
+    driver: bridge
