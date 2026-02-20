@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log
+vendor
+.git
+.gitignore
+.env
+.env.local
+.env.*.local
+storage/logs
+storage/framework/cache
+storage/framework/sessions
+storage/framework/testing
+bootstrap/cache
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
